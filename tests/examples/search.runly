@@ -1,0 +1,8 @@
+# Google search smoke test
+@name: Google search works
+@description: Searches for playwright and verifies results
+@tags: search, smoke
+
+open google.com
+search playwright
+verify url contains search

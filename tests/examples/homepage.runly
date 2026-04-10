@@ -1,0 +1,7 @@
+# Simple smoke test for example.com
+@name: Example homepage loads
+@description: Verifies example.com renders the expected heading
+@tags: smoke, critical
+
+open example.com
+verify Example Domain

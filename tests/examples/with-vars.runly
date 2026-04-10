@@ -1,0 +1,8 @@
+# Demonstrates variable substitution
+# Run with: runly run tests/examples/with-vars.runly --vars '{"site":"example.com","heading":"Example Domain"}'
+@name: Parameterized homepage test
+@tags: smoke, parameterized
+@vars: site, heading
+
+open {{site}}
+verify {{heading}}

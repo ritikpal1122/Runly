@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
+import chalk from 'chalk';
 import { testCommand } from '../src/commands/test.js';
 import { doctorCommand } from '../src/commands/doctor.js';
 import { loginCommand } from '../src/commands/login.js';
@@ -14,13 +15,57 @@ import { recordCommand } from '../src/commands/record.js';
 import { suiteCommand } from '../src/commands/suite.js';
 import { serveCommand } from '../src/commands/serve.js';
 import { sessionsCommand } from '../src/commands/sessions.js';
+import { runCommand } from '../src/commands/run.js';
+import logger from '../src/utils/logger.js';
+
+// Show the branded banner when invoked with no arguments or with --help
+const args = process.argv.slice(2);
+if (args.length === 0 || args[0] === '--help' || args[0] === '-h' || args[0] === 'help') {
+  logger.banner();
+}
 
 const program = new Command();
 
 program
   .name('runly')
   .description('Natural language to Playwright tests — instantly')
-  .version('0.2.0');
+  .version('0.2.0', '-v, --version', 'Show version')
+  .helpOption('-h, --help', 'Show help')
+  .addHelpText('after', `
+${chalk.bold.white('  Quick Examples')}
+${chalk.dim('  ──────────────')}
+  ${chalk.cyan('runly test')} ${chalk.dim('"open google.com and search playwright"')}
+  ${chalk.cyan('runly test')} ${chalk.dim('"open site.com/login and type admin in username"')} --verbose
+  ${chalk.cyan('runly inspect')} ${chalk.dim('google.com "search button"')}
+  ${chalk.cyan('runly watch')} ${chalk.dim('"open site.com and verify homepage"')} --interval 60
+  ${chalk.cyan('runly report')}   ${chalk.dim('# HTML dashboard from past runs')}
+  ${chalk.cyan('runly record')}   ${chalk.dim('# Record interactions into instructions')}
+  ${chalk.cyan('runly doctor')}   ${chalk.dim('# Health check')}
+
+${chalk.bold.white('  Learn More')}
+${chalk.dim('  ──────────')}
+  ${chalk.dim('Docs:')}    ${chalk.underline('https://github.com/runly/runly')}
+  ${chalk.dim('AI mode:')} ${chalk.cyan('runly auth')} ${chalk.dim('sk-ant-...')}
+`);
+
+// ── Primary: runly run <path> (directory/file runner) ─────────
+program
+  .command('run')
+  .description('Run .runly test files from a directory or single file')
+  .argument('<path>', 'Path to .runly file or directory')
+  .option('--tag <tag>', 'Filter tests by tag')
+  .option('--grep <pattern>', 'Filter tests by name/content (regex)')
+  .option('--name <pattern>', 'Filter tests by name (regex)')
+  .option('--parallel <n>', 'Run N tests in parallel', '1')
+  .option('--json', 'Output NDJSON for scripting', false)
+  .option('--verbose', 'Show detailed output', false)
+  .option('--headed', 'Run browser in headed mode', false)
+  .option('--browser <type>', 'Browser (chromium|firefox|webkit)', 'chromium')
+  .option('--no-ai', 'Disable AI parsing/healing')
+  .option('--retry <n>', 'Retry failed tests N times', parseInt)
+  .option('--vars <json>', 'Inline variables JSON')
+  .option('--vars-file <path>', 'Load variables from JSON file')
+  .action(runCommand);
 
 // ── Primary: runly test ────────────────────────────────────────
 program

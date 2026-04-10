@@ -1,0 +1,23 @@
+# Multiple tests in one file, separated by ---
+@name: Homepage heading visible
+@tags: smoke
+
+open example.com
+verify Example Domain
+
+---
+
+@name: Title contains Example
+@tags: smoke
+
+open example.com
+verify title contains Example
+
+---
+
+@name: Learn more link works
+@tags: navigation
+
+open example.com
+click Learn more
+verify url contains iana

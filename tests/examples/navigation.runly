@@ -1,0 +1,8 @@
+# Tests navigation flow on example.com
+@name: Example link navigates to IANA
+@description: Click "More information" and verify URL change
+@tags: navigation, critical
+
+open example.com
+click Learn more
+verify url contains iana
