@@ -1,0 +1,12 @@
+output/
+tests/
+.github/
+node_modules/
+.DS_Store
+.runly/
+skills/
+*.log
+.env
+.env.*
+coverage/
+.nyc_output/

@@ -1,15 +1,51 @@
 {
   "name": "runly",
-  "version": "0.1.0",
-  "description": "Natural language to Playwright tests — instantly",
+  "version": "0.2.0",
+  "description": "Playwright tests in plain English. Lives in your repo. Runs anywhere.",
   "type": "module",
   "bin": {
     "runly": "./bin/runly.js"
   },
+  "main": "bin/runly.js",
   "scripts": {
     "start": "node bin/runly.js",
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "test:examples": "node bin/runly.js run tests/examples/ --no-ai",
+    "doctor": "node bin/runly.js doctor",
+    "prepublishOnly": "node bin/runly.js doctor"
   },
+  "keywords": [
+    "playwright",
+    "testing",
+    "browser-automation",
+    "e2e",
+    "end-to-end",
+    "test-automation",
+    "cli",
+    "ai",
+    "natural-language",
+    "llm",
+    "claude",
+    "anthropic",
+    "self-healing",
+    "qa",
+    "smoke-test",
+    "regression",
+    "chromium",
+    "firefox",
+    "webkit",
+    "tests-as-code"
+  ],
+  "author": "Ritik Pal <https://github.com/ritikpal1122>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ritikpal1122/Runly.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ritikpal1122/Runly/issues"
+  },
+  "homepage": "https://github.com/ritikpal1122/Runly#readme",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.87.0",
     "chalk": "^5.4.0",
@@ -21,5 +57,15 @@
   "engines": {
     "node": ">=18"
   },
-  "license": "MIT"
+  "files": [
+    "bin/",
+    "src/",
+    "action.yml",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

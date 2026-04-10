@@ -1,4 +1,5 @@
 import { writeFileSync } from 'fs';
+import chalk from 'chalk';
 import logger from '../utils/logger.js';
 import { getReportPath } from '../utils/paths.js';
 
@@ -7,41 +8,40 @@ export function reportResult(result) {
 
   // ── Step-by-step results ──────────────────────────────────
   if (result.results && result.results.length > 0) {
-    console.log('  Steps:');
+    logger.section('Steps');
     result.results.forEach((r, i) => {
+      const num = chalk.dim(`${String(i + 1).padStart(2)}.`);
       if (r.success) {
-        logger.success(`  Step ${i + 1}: ${r.message}`);
+        console.log(`  ${num}  ${chalk.green('✓')}  ${r.message}`);
       } else {
-        logger.error(`  Step ${i + 1}: ${r.message}`);
+        console.log(`  ${num}  ${chalk.red('✗')}  ${r.message}`);
       }
     });
-    console.log('');
   }
 
   // ── Summary box ───────────────────────────────────────────
-  const line = '─'.repeat(50);
-  console.log(`  ${line}`);
+  console.log('');
+  const statusLine = result.success
+    ? chalk.bgGreen.black.bold(' PASSED ') +
+      chalk.dim('  ') +
+      chalk.white(`${result.totalSteps || 0} steps in ${result.duration}ms`)
+    : chalk.bgRed.white.bold(' FAILED ') +
+      chalk.dim('  ') +
+      chalk.red(`at step ${result.failedStep || '?'}/${result.totalSteps || '?'}`);
 
-  if (result.success) {
-    logger.success(`  PASSED — ${result.totalSteps || 0} steps in ${result.duration}ms`);
-  } else {
-    logger.error(`  FAILED at step ${result.failedStep || '?'}/${result.totalSteps || '?'}`);
-    logger.error(`  Reason: ${result.error}`);
+  console.log('  ' + statusLine);
+
+  if (!result.success && result.error) {
+    console.log('  ' + chalk.red('  → ') + chalk.dim(result.error));
   }
-
-  console.log(`  ${line}`);
 
   // ── Details ───────────────────────────────────────────────
-  const details = [];
-  if (result.url) details.push(`  URL:         ${result.url}`);
-  if (result.title) details.push(`  Title:       ${result.title}`);
-  if (result.totalSteps) details.push(`  Steps:       ${result.passedSteps || 0}/${result.totalSteps} passed`);
-  if (result.duration) details.push(`  Duration:    ${result.duration}ms`);
-  if (result.screenshot) details.push(`  Screenshot:  ${result.screenshot}`);
-
-  if (details.length > 0) {
-    details.forEach(d => logger.dim(d));
-  }
+  console.log('');
+  if (result.url) logger.label('URL', result.url);
+  if (result.title) logger.label('Title', result.title);
+  if (result.duration) logger.label('Duration', `${result.duration}ms`);
+  if (result.screenshot) logger.label('Screenshot', chalk.dim(result.screenshot));
+  if (result.pooled) logger.label('Browser', chalk.green('pooled (fast)'));
 
   console.log('');
 }
@@ -72,7 +72,8 @@ export function saveReport(result, instruction) {
     };
 
     writeFileSync(reportPath, JSON.stringify(report, null, 2));
-    logger.dim(`  Report:      ${reportPath}`);
+    logger.label('Report', chalk.dim(reportPath));
+    console.log('');
   } catch {
     // Report saving is best-effort
   }
