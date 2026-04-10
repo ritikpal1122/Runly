@@ -1,0 +1,6 @@
+node_modules/
+.DS_Store
+.runly/
+output/screenshots/
+output/specs/
+output/reports/
