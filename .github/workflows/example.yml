@@ -1,0 +1,39 @@
+# Example: Using Runly in GitHub Actions
+#
+# This workflow shows how users can run .runly tests on every PR.
+# Copy this file into .github/workflows/ in your own repo.
+
+name: E2E Tests (Runly)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Run all .runly tests in tests/ directory
+      - name: Run Runly tests
+        uses: ritikpal1122/Runly@v1
+        with:
+          tests: tests/
+
+      # Or: run only critical tests in parallel
+      # - name: Run critical tests
+      #   uses: ritikpal1122/Runly@v1
+      #   with:
+      #     tests: tests/
+      #     tag: critical
+      #     parallel: 4
+
+      # Or: with AI mode enabled
+      # - name: Run with AI healing
+      #   uses: ritikpal1122/Runly@v1
+      #   with:
+      #     tests: tests/
+      #     ai-key: ${{ secrets.ANTHROPIC_API_KEY }}

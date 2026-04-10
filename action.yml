@@ -1,0 +1,115 @@
+name: 'Runly'
+description: 'Natural language browser tests in CI. Write Playwright tests in plain English.'
+author: 'Runly'
+branding:
+  icon: 'zap'
+  color: 'blue'
+
+inputs:
+  tests:
+    description: 'Path to .runly test file or directory'
+    required: false
+    default: 'tests/'
+  tag:
+    description: 'Filter tests by tag'
+    required: false
+  grep:
+    description: 'Filter tests by name/content (regex)'
+    required: false
+  parallel:
+    description: 'Number of tests to run in parallel'
+    required: false
+    default: '1'
+  browser:
+    description: 'Browser engine (chromium|firefox|webkit)'
+    required: false
+    default: 'chromium'
+  ai-key:
+    description: 'Anthropic API key for AI mode (optional)'
+    required: false
+  vars:
+    description: 'JSON string of variables for interpolation'
+    required: false
+  vars-file:
+    description: 'Path to JSON variables file'
+    required: false
+  upload-artifacts:
+    description: 'Upload screenshots/reports as artifacts on failure'
+    required: false
+    default: 'true'
+
+outputs:
+  passed:
+    description: 'Number of tests that passed'
+  failed:
+    description: 'Number of tests that failed'
+  total:
+    description: 'Total tests run'
+  report-path:
+    description: 'Path to the test reports directory'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Cache Playwright browsers
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-chromium
+
+    - name: Install Runly
+      shell: bash
+      run: |
+        npm install -g runly
+        npx playwright install --with-deps ${{ inputs.browser }}
+
+    - name: Configure AI (optional)
+      if: inputs.ai-key != ''
+      shell: bash
+      env:
+        ANTHROPIC_API_KEY: ${{ inputs.ai-key }}
+      run: echo "ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY" >> $GITHUB_ENV
+
+    - name: Run tests
+      id: runly-run
+      shell: bash
+      env:
+        ANTHROPIC_API_KEY: ${{ inputs.ai-key }}
+      run: |
+        ARGS="${{ inputs.tests }}"
+        [ -n "${{ inputs.tag }}" ] && ARGS="$ARGS --tag ${{ inputs.tag }}"
+        [ -n "${{ inputs.grep }}" ] && ARGS="$ARGS --grep \"${{ inputs.grep }}\""
+        [ -n "${{ inputs.parallel }}" ] && ARGS="$ARGS --parallel ${{ inputs.parallel }}"
+        [ -n "${{ inputs.browser }}" ] && ARGS="$ARGS --browser ${{ inputs.browser }}"
+        [ -n "${{ inputs.vars }}" ] && ARGS="$ARGS --vars '${{ inputs.vars }}'"
+        [ -n "${{ inputs.vars-file }}" ] && ARGS="$ARGS --vars-file ${{ inputs.vars-file }}"
+
+        echo "Running: runly run $ARGS"
+        runly run $ARGS --json > runly-output.ndjson || echo "runly_exit=$?" >> $GITHUB_OUTPUT
+
+        # Parse final result from NDJSON
+        LAST_LINE=$(tail -n 1 runly-output.ndjson)
+        PASSED=$(echo "$LAST_LINE" | grep -o '"passed":[0-9]*' | cut -d: -f2 || echo 0)
+        FAILED=$(echo "$LAST_LINE" | grep -o '"failed":[0-9]*' | cut -d: -f2 || echo 0)
+        TOTAL=$(echo "$LAST_LINE" | grep -o '"total":[0-9]*' | cut -d: -f2 || echo 0)
+
+        echo "passed=$PASSED" >> $GITHUB_OUTPUT
+        echo "failed=$FAILED" >> $GITHUB_OUTPUT
+        echo "total=$TOTAL" >> $GITHUB_OUTPUT
+        echo "report-path=output/reports" >> $GITHUB_OUTPUT
+
+    - name: Upload artifacts on failure
+      if: failure() && inputs.upload-artifacts == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: runly-failures
+        path: |
+          output/screenshots/
+          output/reports/
+          runly-output.ndjson
+        retention-days: 14
