@@ -1,0 +1,19 @@
+@name: AI-verified checkout
+@tags: e2e, ai-assertion
+@description: Uses a `verify ai:` semantic check instead of literal text matching
+
+@use login.runly with user=standard_user pass=secret_sauce
+
+click add to cart for sauce labs backpack
+click add to cart for sauce labs onesie
+click cart icon
+
+verify ai: both the backpack and the onesie are present in the cart
+
+click checkout button
+type Ritik in first name field
+type Pal in last name field
+type 560001 in zip code field
+click continue button
+
+verify ai: the total price equals the sum of individual item prices plus tax

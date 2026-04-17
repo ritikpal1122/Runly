@@ -1,5 +1,6 @@
 import { findElement, findFirstInput, findSelect } from './selectorEngine.js';
 import { findElementWithAI } from '../ai/healer.js';
+import { aiAssertion } from '../ai/assertion.js';
 import { getScreenshotPath } from '../utils/paths.js';
 import logger from '../utils/logger.js';
 
@@ -224,6 +225,15 @@ export async function executeStep(page, step, options = {}) {
     // ── Assertions ────────────────────────────────────────────
     case 'assert': {
       return executeAssertion(page, step.assertion);
+    }
+
+    case 'ai-assert': {
+      const verdict = await aiAssertion(page, step.assertion, options);
+      if (verdict.passed) {
+        return ok(`AI verified: ${step.assertion} — ${verdict.reasoning}`);
+      }
+      const why = verdict.reasoning ? ` — ${verdict.reasoning}` : '';
+      return fail(`AI assertion failed: ${step.assertion}${why}`);
     }
 
     default:

@@ -43,6 +43,19 @@ const AMBIGUOUS_WORDS = new Set([
 export function parse(rawInput) {
   if (!rawInput || typeof rawInput !== 'string') return [];
 
+  // AI assertion short-circuit — `verify ai: <free-form English>` is parsed
+  // as a single atomic step. The assertion text may contain "and", commas,
+  // etc., which would otherwise confuse the regex tokenizer.
+  const trimmed = rawInput.trim();
+  const aiMatch = trimmed.match(/^(?:verify|assert|check|ensure|confirm)\s+ai\s*:\s*(.+)$/i);
+  if (aiMatch) {
+    return [{
+      action: 'ai-assert',
+      assertion: aiMatch[1].trim(),
+      raw: trimmed,
+    }];
+  }
+
   const tokens = tokenize(rawInput); // [{lower, original}, ...]
   if (tokens.length === 0) return [];
 

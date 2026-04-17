@@ -154,7 +154,14 @@ export async function runCommand(path, options) {
 
 async function runSingleTest(test, globalVars, options, jsonMode) {
   const testVars = { ...globalVars };
-  const instruction = interpolate(test.combined, testVars);
+
+  // Interpolate each instruction separately so directives like `verify ai: X`
+  // stay as single atomic lines (they'd otherwise be fragmented when joined
+  // with " and " and run through the tokenizer).
+  const interpolatedLines = (test.instructions || [test.combined]).map((line) =>
+    interpolate(line, testVars)
+  );
+  const instruction = interpolatedLines.join(' and ');
 
   // Check required vars
   const missing = test.requiredVars.filter(v => !(v in testVars));
@@ -175,10 +182,17 @@ async function runSingleTest(test, globalVars, options, jsonMode) {
     logger.dim(`  → ${test.name}`);
   }
 
+  // Parse per-line: regex parser first (handles AI assertions, normal actions),
+  // fall back to Claude-powered parser only for lines the regex can't.
   const aiAvailable = isAIAvailable() && options.ai !== false;
-  const steps = aiAvailable
-    ? await parseWithAI(instruction, options)
-    : parse(instruction);
+  const steps = [];
+  for (const line of interpolatedLines) {
+    let lineSteps = parse(line);
+    if (lineSteps.length === 0 && aiAvailable) {
+      lineSteps = (await parseWithAI(line, options)) || [];
+    }
+    if (lineSteps.length > 0) steps.push(...lineSteps);
+  }
 
   if (!steps || steps.length === 0) {
     return {
