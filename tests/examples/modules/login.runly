@@ -1,0 +1,10 @@
+# Reusable login flow.
+# Callers inject {{user}} and {{pass}} via `@use login.runly with user=... pass=...`
+
+@name: Log in module
+@description: Fill username + password, click login
+
+open https://www.saucedemo.com/
+type {{user}} in username field
+type {{pass}} in password field
+click login button

@@ -26,22 +26,23 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 import { readFileSync, existsSync, statSync, readdirSync } from 'fs';
-import { join, basename, extname } from 'path';
+import { join, basename, extname, dirname, isAbsolute } from 'path';
 
 // ── Parse a single .runly file ─────────────────────────────────────────────
+// opts: { visited: Set<string>, callerVars: Record<string,string> }
 
-export function parseRunlyFile(filePath) {
+export function parseRunlyFile(filePath, opts = {}) {
   if (!existsSync(filePath)) {
     throw new Error(`Test file not found: ${filePath}`);
   }
 
   const content = readFileSync(filePath, 'utf8');
-  return parseRunlyContent(content, filePath);
+  return parseRunlyContent(content, filePath, opts);
 }
 
 // ── Parse content of a .runly file ─────────────────────────────────────────
 
-export function parseRunlyContent(content, sourcePath = 'inline') {
+export function parseRunlyContent(content, sourcePath = 'inline', opts = {}) {
   // Split into test blocks (separated by --- lines)
   const blocks = content
     .split(/^---+\s*$/gm)
@@ -49,7 +50,7 @@ export function parseRunlyContent(content, sourcePath = 'inline') {
     .filter(b => b.length > 0);
 
   const tests = blocks
-    .map((block, i) => parseTestBlock(block, sourcePath, i))
+    .map((block, i) => parseTestBlock(block, sourcePath, i, opts))
     .filter(Boolean);
 
   return tests;
@@ -57,13 +58,15 @@ export function parseRunlyContent(content, sourcePath = 'inline') {
 
 // ── Parse a single test block ──────────────────────────────────────────────
 
-function parseTestBlock(block, sourcePath, index) {
+function parseTestBlock(block, sourcePath, index, opts = {}) {
   const lines = block.split('\n');
   const metadata = {};
   const instructions = [];
+  const sourceDir = typeof sourcePath === 'string' ? dirname(sourcePath) : process.cwd();
+  const visited = opts.visited || new Set();
+  const callerVars = opts.callerVars || {};
 
   for (let line of lines) {
-    const raw = line;
     line = line.trim();
 
     // Skip empty lines
@@ -71,6 +74,19 @@ function parseTestBlock(block, sourcePath, index) {
 
     // Skip comments
     if (line.startsWith('#')) continue;
+
+    // ── @use directive: inline another .runly file's steps ──────────────
+    //   @use login.runly
+    //   @use ./flows/login.runly with user=admin pass="secret 123"
+    //   @use ../shared/signup with email={{test_email}}
+    const useMatch = line.match(/^@use\s+(\S+)(?:\s+with\s+(.+))?$/i);
+    if (useMatch) {
+      const relPath = useMatch[1];
+      const withClause = useMatch[2] || '';
+      const expanded = expandUseDirective(relPath, withClause, sourceDir, visited, callerVars);
+      for (const inst of expanded) instructions.push(inst);
+      continue;
+    }
 
     // Parse metadata (@key: value)
     const metaMatch = line.match(/^@([a-zA-Z_]+):\s*(.*)$/);
@@ -111,6 +127,79 @@ function parseTestBlock(block, sourcePath, index) {
     source: sourcePath,
     metadata,
   };
+}
+
+// ── @use expansion ─────────────────────────────────────────────────────────
+//
+// Takes `@use login.runly with user=admin pass=secret` and returns the
+// instruction lines from login.runly's first block, with {{user}} and {{pass}}
+// substituted inline. Leaves {{other}} tokens alone so runtime --vars can
+// still resolve them.
+//
+// Cycle detection: throws if a file appears twice in the visited chain.
+
+function expandUseDirective(relPath, withClause, sourceDir, visited, callerVars) {
+  const fullPath = resolveUsePath(relPath, sourceDir);
+  if (!fullPath) {
+    throw new Error(`@use target not found: ${relPath} (searched from ${sourceDir})`);
+  }
+
+  if (visited.has(fullPath)) {
+    const chain = [...visited, fullPath].map(p => basename(p)).join(' → ');
+    throw new Error(`@use cycle detected: ${chain}`);
+  }
+
+  const newVisited = new Set(visited);
+  newVisited.add(fullPath);
+
+  // Merge caller's propagated vars with this call's `with` clause.
+  // `with` wins on conflict so direct imports override inherited.
+  const localVars = { ...callerVars, ...parseWithClause(withClause) };
+
+  const tests = parseRunlyFile(fullPath, { visited: newVisited, callerVars: localVars });
+  if (tests.length === 0) return [];
+
+  // Only the first test block is inlined — modules are single-flow by convention.
+  // If a user wants multiple flows from one file, they @use each by anchor (future v0.4).
+  return tests[0].instructions.map(inst => substituteVars(inst, localVars));
+}
+
+function resolveUsePath(relPath, sourceDir) {
+  const withExt = relPath.endsWith('.runly') || relPath.endsWith('.runly.md');
+  const addExt = (p) => (withExt ? [p] : [p, p + '.runly']);
+
+  const bases = isAbsolute(relPath)
+    ? [relPath]
+    : [join(sourceDir, relPath), join(process.cwd(), relPath)];
+
+  for (const b of bases) {
+    for (const candidate of addExt(b)) {
+      if (existsSync(candidate) && statSync(candidate).isFile()) return candidate;
+    }
+  }
+  return null;
+}
+
+// Parse `with` clause key=value pairs. Values can be quoted or {{var}}.
+//   user=admin pass="hello world" email={{test_email}}
+function parseWithClause(clause) {
+  if (!clause || !clause.trim()) return {};
+  const vars = {};
+  const re = /(\w+)=(?:"([^"]*)"|'([^']*)'|(\{\{[^}]+\}\})|(\S+))/g;
+  let m;
+  while ((m = re.exec(clause)) != null) {
+    vars[m[1]] = m[2] ?? m[3] ?? m[4] ?? m[5];
+  }
+  return vars;
+}
+
+// Substitute {{key}} with vars[key] where provided, leave others untouched
+// so runtime --vars interpolation still runs on them.
+function substituteVars(text, vars) {
+  return text.replace(/\{\{(\w+)\}\}/g, (full, key) => {
+    if (vars[key] != null) return vars[key];
+    return full;
+  });
 }
 
 // ── Discover all .runly files in a directory (recursive) ───────────────────

@@ -1,0 +1,9 @@
+@name: Standard user completes checkout
+@tags: e2e, checkout, critical
+
+@use login.runly with user=standard_user pass=secret_sauce
+
+click add to cart for sauce labs backpack
+click cart icon
+verify sauce labs backpack is visible
+click checkout button
