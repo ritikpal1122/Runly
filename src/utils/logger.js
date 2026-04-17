@@ -16,7 +16,7 @@ const LOGO_LINES = [
 ];
 
 const TAGLINE = 'Natural Language → Browser Automation';
-const VERSION = 'v0.2.0';
+const VERSION = 'v0.3.0';
 
 // Gradient effect: each line a slightly different cyan/blue shade
 function renderLogo() {
