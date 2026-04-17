@@ -17,6 +17,7 @@ import { serveCommand } from '../src/commands/serve.js';
 import { sessionsCommand } from '../src/commands/sessions.js';
 import { runCommand } from '../src/commands/run.js';
 import { replCommand } from '../src/commands/repl.js';
+import { mcpCommand } from '../src/commands/mcp.js';
 import logger from '../src/utils/logger.js';
 
 // No arguments → launch interactive REPL (don't run commander)
@@ -196,6 +197,12 @@ program
   .description('Start HTTP API server for programmatic test runs')
   .option('--port <port>', 'Port to listen on', '3737')
   .action(serveCommand);
+
+// ── MCP ────────────────────────────────────────────────────────
+program
+  .command('mcp')
+  .description('Start the MCP server (for Claude Code, Cursor, Windsurf, etc.)')
+  .action(mcpCommand);
 
   program.parse();
 }
