@@ -22,7 +22,10 @@ import { isAIAvailable } from '../ai/client.js';
 import { runSteps } from '../runner/index.js';
 import { runWithRetry } from '../runner/retry.js';
 import { interpolate, mergeVars } from '../parser/interpolate.js';
-import { getReportPath } from '../utils/paths.js';
+import { getReportPath, getSpecPath } from '../utils/paths.js';
+import { generate } from '../generator/index.js';
+import { generateDashboard } from './report.js';
+import { saveReport } from '../reporter/index.js';
 
 export async function runCommand(path, options) {
   if (!options.json) logger.banner();
@@ -130,6 +133,18 @@ export async function runCommand(path, options) {
       console.log('  ' + chalk.bgRed.white.bold(' FAILED ') + chalk.dim('   ') + `${failed}/${results.length} tests failed (${passRate}% pass rate)`);
     }
     console.log('');
+
+    // Auto-update HTML dashboard after suite run
+    if (options.dashboard !== false) {
+      try {
+        const dash = generateDashboard({ limit: 50, silent: true });
+        if (dash) {
+          logger.dim(`  Dashboard:    ${dash.path}`);
+          logger.dim(`                ${dash.total} runs · ${dash.passRate}% pass rate · avg ${dash.avgDuration}ms`);
+        }
+      } catch {}
+      console.log('');
+    }
   }
 
   if (failed > 0) process.exit(1);
@@ -180,6 +195,20 @@ async function runSingleTest(test, globalVars, options, jsonMode) {
   const result = (test.retry || options.retry)
     ? await runWithRetry(steps, { ...runOpts, retry: test.retry || options.retry })
     : await runSteps(steps, runOpts);
+
+  // Auto-save JSON report
+  try { saveReport(result, instruction); } catch {}
+
+  // Auto-save Playwright spec file per test
+  if (options.spec !== false && steps && steps.length > 0) {
+    try {
+      const code = generate(steps, { rawInput: instruction, headless: !options.headed });
+      const namePrefix = (test.name || 'test').replace(/[^a-z0-9]/gi, '-').substring(0, 40);
+      const specPath = getSpecPath(namePrefix);
+      writeFileSync(specPath, code);
+      if (!jsonMode && options.verbose) logger.dim(`    Spec: ${specPath}`);
+    } catch {}
+  }
 
   const summary = {
     name: test.name,

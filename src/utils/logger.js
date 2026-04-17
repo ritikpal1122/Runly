@@ -32,8 +32,15 @@ function renderLogo() {
 }
 
 // ── Full branded banner ─────────────────────────────────────────
+// Can be suppressed by setting RUNLY_NO_BANNER env var (used by REPL)
+
+let bannerSuppressed = false;
+
+function suppressBanner() { bannerSuppressed = true; }
+function allowBanner() { bannerSuppressed = false; }
 
 function banner() {
+  if (bannerSuppressed || process.env.RUNLY_NO_BANNER === '1') return;
   console.log('');
   console.log(renderLogo());
   console.log('');
@@ -94,6 +101,8 @@ function stripAnsi(str) {
 
 const logger = {
   banner,
+  suppressBanner,
+  allowBanner,
   compact,
   divider,
   box,

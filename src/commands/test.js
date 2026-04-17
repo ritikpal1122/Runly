@@ -1,4 +1,5 @@
 import { writeFileSync } from 'fs';
+import chalk from 'chalk';
 import logger from '../utils/logger.js';
 import { parse } from '../parser/index.js';
 import { parseWithAI } from '../ai/parser.js';
@@ -9,6 +10,7 @@ import { runWithRetry } from '../runner/retry.js';
 import { debugRun } from '../runner/debugger.js';
 import { saveBaseline, compareWithBaseline } from '../runner/visualDiff.js';
 import { reportResult, saveReport } from '../reporter/index.js';
+import { generateDashboard } from './report.js';
 import { saveLastRun } from '../utils/config.js';
 import { getSpecPath } from '../utils/paths.js';
 import { interpolate, mergeVars } from '../parser/interpolate.js';
@@ -16,7 +18,7 @@ import { rememberIntent } from '../ai/cache.js';
 import { getDomain } from '../runner/sessionStore.js';
 
 export async function testCommand(instruction, options) {
-  logger.banner();
+  if (!options._fromRepl) logger.banner();
 
   // Variable substitution
   const vars = mergeVars(options);
@@ -38,6 +40,7 @@ export async function testCommand(instruction, options) {
     reportResult(result);
     saveReport(result, interpolated);
     await saveLastRun({ instruction: interpolated, url, options });
+    autoFinalize(result, interpolated, null, options);
     if (!result.success) process.exit(1);
     return;
   }
@@ -46,14 +49,6 @@ export async function testCommand(instruction, options) {
   if (options.verbose) {
     steps.forEach((s, i) => logger.step(i + 1, s.raw));
     console.log('');
-  }
-
-  // --save: export spec file
-  if (options.save) {
-    const code = generate(steps, { rawInput: interpolated, headless: !options.headed });
-    const specPath = getSpecPath(interpolated.split(' ').slice(0, 4).join('-'));
-    writeFileSync(specPath, code);
-    logger.success(`Saved: ${specPath}`);
   }
 
   // --debug: interactive debugger
@@ -77,12 +72,10 @@ export async function testCommand(instruction, options) {
 
     // Visual regression check
     if (options.baseline && result.success && result.screenshot) {
-      const key = interpolated;
-      saveBaseline(key, result.screenshot);
+      saveBaseline(interpolated, result.screenshot);
       logger.success('Baseline saved');
     } else if (options.diff && result.success && result.screenshot) {
-      const key = interpolated;
-      const cmp = compareWithBaseline(key, result.screenshot);
+      const cmp = compareWithBaseline(interpolated, result.screenshot);
       if (!cmp.hasBaseline) {
         logger.warn('No baseline exists — run with --baseline first');
       } else if (cmp.match) {
@@ -99,9 +92,13 @@ export async function testCommand(instruction, options) {
 
     // Remember successful runs
     if (result.success && steps.length > 0) {
-      const domain = steps.find(s => s.action === 'goto') ? getDomain(steps.find(s => s.action === 'goto').url) : null;
+      const gotoStep = steps.find(s => s.action === 'goto');
+      const domain = gotoStep ? getDomain(gotoStep.url) : null;
       rememberIntent(interpolated, steps, domain);
     }
+
+    // ── AUTO-FINALIZE: save spec + update dashboard ────────────
+    autoFinalize(result, interpolated, steps, options);
 
     await saveLastRun({ instruction: interpolated, options });
 
@@ -112,6 +109,43 @@ export async function testCommand(instruction, options) {
     if (options.verbose) console.error(err.stack);
     process.exit(1);
   }
+}
+
+// ── Post-run automation: save spec file and update HTML dashboard ─────────
+// Users can opt out with --no-spec and --no-dashboard
+
+function autoFinalize(result, instruction, steps, options) {
+  const autoSpec = options.spec !== false && steps && steps.length > 0;
+  const autoDashboard = options.dashboard !== false;
+
+  console.log('');
+
+  // 1. Auto-save Playwright spec file
+  if (autoSpec) {
+    try {
+      const code = generate(steps, { rawInput: instruction, headless: !options.headed });
+      const namePrefix = instruction.split(/\s+/).slice(0, 4).join('-').substring(0, 40);
+      const specPath = getSpecPath(namePrefix);
+      writeFileSync(specPath, code);
+      logger.dim(`  Spec:         ${specPath}`);
+    } catch (err) {
+      if (options.verbose) logger.dim(`  Spec generation failed: ${err.message}`);
+    }
+  }
+
+  // 2. Auto-update HTML dashboard
+  if (autoDashboard) {
+    try {
+      const dash = generateDashboard({ limit: 50, silent: true });
+      if (dash) {
+        logger.dim(`  Dashboard:    ${dash.path}  ${chalk.dim(`(${dash.total} runs, ${dash.passRate}% pass)`)}`);
+      }
+    } catch (err) {
+      if (options.verbose) logger.dim(`  Dashboard update failed: ${err.message}`);
+    }
+  }
+
+  console.log('');
 }
 
 function resolveUrl(input) {

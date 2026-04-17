@@ -16,13 +16,22 @@ import { suiteCommand } from '../src/commands/suite.js';
 import { serveCommand } from '../src/commands/serve.js';
 import { sessionsCommand } from '../src/commands/sessions.js';
 import { runCommand } from '../src/commands/run.js';
+import { replCommand } from '../src/commands/repl.js';
 import logger from '../src/utils/logger.js';
 
-// Show the branded banner when invoked with no arguments or with --help
+// No arguments → launch interactive REPL (don't run commander)
 const args = process.argv.slice(2);
-if (args.length === 0 || args[0] === '--help' || args[0] === '-h' || args[0] === 'help') {
-  logger.banner();
+if (args.length === 0) {
+  replCommand();
+  // REPL is async and holds the process open — don't continue to commander
+} else {
+  if (args[0] === '--help' || args[0] === '-h' || args[0] === 'help') {
+    logger.banner();
+  }
+  main();
 }
+
+function main() {
 
 const program = new Command();
 
@@ -62,6 +71,8 @@ program
   .option('--headed', 'Run browser in headed mode', false)
   .option('--browser <type>', 'Browser (chromium|firefox|webkit)', 'chromium')
   .option('--no-ai', 'Disable AI parsing/healing')
+  .option('--no-spec', 'Do not auto-generate Playwright spec files')
+  .option('--no-dashboard', 'Do not auto-update HTML dashboard')
   .option('--retry <n>', 'Retry failed tests N times', parseInt)
   .option('--vars <json>', 'Inline variables JSON')
   .option('--vars-file <path>', 'Load variables from JSON file')
@@ -73,10 +84,11 @@ program
   .description('Run a test from natural language or URL')
   .argument('<instruction>', 'English instruction or URL to test')
   .option('--headed', 'Run browser in headed mode', false)
-  .option('--save', 'Save generated .spec.js file', false)
   .option('--browser <type>', 'Browser to use (chromium|firefox|webkit)', 'chromium')
   .option('--verbose', 'Show detailed output', false)
   .option('--no-ai', 'Disable AI parsing/healing (use regex only)')
+  .option('--no-spec', 'Do not auto-generate Playwright spec file')
+  .option('--no-dashboard', 'Do not auto-update HTML dashboard')
   .option('--retry <n>', 'Retry failed tests N times', parseInt)
   .option('--retry-delay <s>', 'Seconds between retries', '2')
   .option('--debug', 'Interactive step-by-step debugger', false)
@@ -185,4 +197,6 @@ program
   .option('--port <port>', 'Port to listen on', '3737')
   .action(serveCommand);
 
-program.parse();
+  program.parse();
+}
+

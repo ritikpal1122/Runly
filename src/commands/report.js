@@ -1,28 +1,40 @@
 // runly report — generate HTML dashboard from JSON reports in output/reports/
+// Also exported as generateDashboard() for automatic post-run updates
 
 import { readFileSync, readdirSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import logger from '../utils/logger.js';
 
-export async function reportCommand(options) {
-  logger.banner();
+// ── Main CLI command ───────────────────────────────────────────────────────
 
-  const reportsDir = join(process.cwd(), 'output', 'reports');
-  if (!existsSync(reportsDir)) {
-    logger.error(`No reports found at ${reportsDir}`);
+export async function reportCommand(options = {}) {
+  if (!options._fromRepl) logger.banner();
+
+  const result = generateDashboard({ limit: options.limit || 50 });
+
+  if (!result) {
+    logger.error('No reports to display');
     return;
   }
+
+  logger.success(`Dashboard generated: ${result.path}`);
+  logger.dim(`  ${result.total} runs | ${result.passed} passed | ${result.failed} failed | ${result.passRate}% pass rate`);
+  logger.dim(`  Open: file://${result.path}`);
+}
+
+// ── Reusable dashboard generator (used by test/run commands) ──────────────
+
+export function generateDashboard({ limit = 50, silent = false } = {}) {
+  const reportsDir = join(process.cwd(), 'output', 'reports');
+  if (!existsSync(reportsDir)) return null;
 
   const files = readdirSync(reportsDir)
     .filter(f => f.endsWith('.json'))
     .sort()
     .reverse()
-    .slice(0, options.limit || 50);
+    .slice(0, limit);
 
-  if (files.length === 0) {
-    logger.warn('No reports to display');
-    return;
-  }
+  if (files.length === 0) return null;
 
   const reports = files.map(f => {
     try {
@@ -48,7 +60,7 @@ export async function reportCommand(options) {
       return `<div style="font-family:monospace;font-size:12px;color:${color}"><b>${icon}</b> ${escapeHtml(s)}</div>`;
     }).join('');
 
-    const screenshot = r.screenshot ? `<a href="file://${r.screenshot}" target="_blank">Screenshot</a>` : '-';
+    const screenshot = r.screenshot ? `<a href="file://${r.screenshot}" target="_blank">📷</a>` : '-';
 
     return `
       <tr style="background:${bg}">
@@ -68,6 +80,7 @@ export async function reportCommand(options) {
 <head>
   <meta charset="utf-8">
   <title>Runly Report Dashboard</title>
+  <meta http-equiv="refresh" content="30">
   <style>
     body { font-family: -apple-system, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
     h1 { margin: 0 0 8px; }
@@ -80,11 +93,12 @@ export async function reportCommand(options) {
     td { padding: 12px; border-bottom: 1px solid #eee; vertical-align: top; font-size: 14px; }
     .pass { color: #4caf50; }
     .fail { color: #f44336; }
+    a { text-decoration: none; font-size: 18px; }
   </style>
 </head>
 <body>
   <h1>🧪 Runly Dashboard</h1>
-  <p style="color:#666;margin:0">Showing ${reports.length} most recent test runs</p>
+  <p style="color:#666;margin:0">Showing ${reports.length} most recent test runs · auto-refreshes every 30s</p>
 
   <div class="stats">
     <div class="stat">
@@ -129,9 +143,14 @@ export async function reportCommand(options) {
   const outputPath = join(outputDir, 'dashboard.html');
   writeFileSync(outputPath, html);
 
-  logger.success(`Dashboard generated: ${outputPath}`);
-  logger.dim(`  ${reports.length} runs | ${passed} passed | ${failed} failed | ${passRate}% pass rate`);
-  logger.dim(`  Open: file://${outputPath}`);
+  return {
+    path: outputPath,
+    total: reports.length,
+    passed,
+    failed,
+    passRate,
+    avgDuration,
+  };
 }
 
 function escapeHtml(s) {
