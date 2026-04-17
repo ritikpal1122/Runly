@@ -40,7 +40,7 @@ const program = new Command();
 program
   .name('runly')
   .description('Natural language to Playwright tests — instantly')
-  .version('0.2.0', '-v, --version', 'Show version')
+  .version('0.3.0', '-v, --version', 'Show version')
   .helpOption('-h, --help', 'Show help')
   .addHelpText('after', `
 ${chalk.bold.white('  Quick Examples')}

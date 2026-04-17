@@ -11,15 +11,15 @@ Goal: ship features that go beyond KaneAI/Momentic so Runly becomes a credible l
 - [x] **#1 — Audit + commit current repo state.** REPL (342 LOC, was untracked) and auto-spec/dashboard finalization are now committed as `bc08bf5`.
 - [x] **#2 — Build MCP server (`runly mcp`).** Committed as `331da57`. Six tools (`runly_test`, `runly_run_file`, `runly_list_tests`, `runly_inspect`, `runly_open_url`, `runly_last_run`) exposed over stdio. End-to-end smoke test passes — `runly_open_url` fetches example.com in 314ms.
 - [x] **#3 — Build Playwright → .runly migrator (`runly import`).** Committed as `1c7ebab`. Regex-based converter handles all common Playwright patterns. Round-trip verified on login.spec.ts — 3 tests / 15 steps / 0 TODOs, converted file runs green in 1020ms.
-- [ ] **#4 — Add modules/reusable-flows (`@use` directive).** Momentic-style reuse, but plain-text. Syntax: `@use login.runly with user={{admin}}`. Implemented in fileParser.js — inline the referenced file's steps with variable overrides.
-- [ ] **#5 — Add AI assertions (`verify ai: ...`).** Parser recognizes `verify ai: cart total equals sum of items`. Runner takes DOM snapshot + screenshot, asks Claude to decide pass/fail with reasoning. Momentic's killer feature, ported to plain English.
-- [ ] **#6 — Add Faker integration (`{{faker.email}}`, `{{faker.name}}`).** Add `@faker-js/faker` dep. Extend `interpolate.js` to resolve `{{faker.*}}` expressions at run time.
+- [x] **#4 — Modules/reusable-flows (`@use` directive).** Committed as `6a6a701`. Syntax `@use login.runly with user=admin pass=secret` inlines steps with variable overrides; cycle detection throws on recursive imports.
+- [x] **#5 — AI assertions (`verify ai: ...`).** Committed as `d730a28`. Parser routes `verify ai: X` to a structured step; runner snapshots DOM, asks Claude, gets a strict JSON verdict with reasoning.
+- [x] **#6 — Faker integration.** Committed as `28a774d`. Any `{{faker.<path>}}` resolves via `@faker-js/faker` at interpolation time — e.g. `{{faker.person.firstName}}`, `{{faker.internet.email}}`.
 - [ ] **#7 — Add Playwright trace + video capture.** Wire `context.tracing.start()` + `recordVideo`. Add `--trace` flag. Output `output/traces/run-{ts}.zip`. Print `npx playwright show-trace <path>` instruction on completion.
 - [ ] **#8 — Swap byte-level visual diff for pixelmatch.** Replace `src/runner/visualDiff.js` byte compare with `pixelmatch` + `pngjs`. Write a `diff.png` highlighting changed regions. Configurable `--threshold` (default 0.1).
 
 ## Phase 2 — Demo content (late Week 1 / early Week 2)
 
-- [ ] **#9 — Port Momentic Swag Labs test to `.runly`.** Create `tests/examples/swag-labs/` with `standard-user-purchases.runly` and `cart-and-sorting.runly` using new `@use` modules + `verify ai:` assertions. Head-to-head "our syntax is cleaner" artifact.
+- [x] **#9 — Swag Labs head-to-head.** Committed as `c6dc239`. Full port of momentic-ai/examples/web: 245 lines of Momentic YAML → 70 lines of Runly plain text (3.5× smaller). Uses every new feature from #4-#6.
 - [ ] **#10 — Write 20+ tests for core modules.** Zero coverage = hiring red flag. Cover parser, interpolate, selectorEngine, sessionStore, visualDiff, MCP tool handlers. Use `node --test`. Green CI badge in README.
 - [ ] **#11 — Rewrite README with MCP hero demo + GIF.** Lead with *"Plain-English browser tests for AI agents, via MCP."* Terminalizer GIF showing Claude Code calling Runly. Move feature table below the fold.
 - [ ] **#12 — Record 90-sec Loom demos.** Three Looms:
