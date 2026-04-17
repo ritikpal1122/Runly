@@ -24,7 +24,7 @@ Show HN: I built a CLI that writes browser tests from English
 
 **Option C (anti-enterprise angle):**
 ```
-Show HN: Runly – An open-source CLI alternative to Testim/KaneAI
+Show HN: Runly – An open-source CLI alternative to cloud test SaaS
 ```
 
 ---
@@ -36,7 +36,7 @@ Hi HN,
 
 I built Runly because I was tired of writing the same 20 lines of
 Playwright boilerplate for every quick smoke test. The enterprise
-alternatives (Testim, Mabl, KaneAI, Momentic) start at $500/month
+enterprise alternatives start at $500/month
 and lock your tests in their dashboards, not your repo.
 
 Runly is a CLI that converts English into Playwright actions:
@@ -132,7 +132,7 @@ These will come up. Have a calm answer ready.
 > at runtime. When it heals a selector, it caches the result so future
 > runs don't need AI.
 
-### "How does this compare to KaneAI/Momentic/Testim?"
+### "How does this compare to the AI-native test platforms?"
 
 > Different category. Those are enterprise SaaS platforms — they sell
 > to non-technical QA teams with dashboards, cloud runners, SOC 2,

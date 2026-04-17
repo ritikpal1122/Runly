@@ -1,20 +1,22 @@
-# Swag Labs — head-to-head against Momentic
+# Swag Labs — plain-text browser tests
 
-This directory is a direct port of [momentic-ai/examples/web](https://github.com/momentic-ai/examples/tree/main/web), rewritten in `.runly` plain-text format.
+This directory is a full end-to-end suite for [Swag Labs](https://www.saucedemo.com/) (the Sauce Labs demo e-commerce app), written entirely in the `.runly` format.
 
-## What the comparison shows
+It's a working reference for how to structure real-world tests in Runly — reusable modules, semantic AI assertions, and synthetic checkout data.
 
-| | Momentic | Runly |
+## What this suite covers
+
+| | Cloud-editor YAML tools | Runly |
 |---|---|---|
 | Format | YAML with UUIDs | Plain text |
 | Test authoring | Cloud GUI editor | Any text editor |
 | Git-diffable | No (UUID churn) | Yes |
-| Module reuse | `moduleId: 68aab6c6-21e6-4e0b-a8cf-217765f4fb1f` | `@use login.runly` |
-| AI assertions | `type: AI_ASSERTION` | `verify ai: …` |
+| Module reuse | `moduleId: 68aab6c6-21e6-…` | `@use login.runly` |
+| AI assertions | `type: AI_ASSERTION` block | `verify ai: …` line |
 | Synthetic data | `{{faker.person.firstName()}}` | `{{faker.person.firstName}}` |
-| Runtime dependency | Momentic cloud | None (local Playwright) |
-| License | Closed | MIT |
-| LOC (same 2 tests + 3 modules) | **245 lines YAML** | **70 lines plain text** — 3.5× smaller |
+| Runtime dependency | Vendor cloud | None (local Playwright) |
+| License | Usually closed | MIT |
+| LOC (same 2 tests + 3 modules) | **~245 lines YAML** | **70 lines plain text** — 3.5× smaller |
 
 ## Files
 

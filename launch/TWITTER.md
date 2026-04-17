@@ -150,6 +150,6 @@ I've been using for years.
 
 - Don't say "revolutionary"
 - Don't say "AI-first" (it's not — regex is first)
-- Don't bash competitors by name (KaneAI/Testim) in positive tweets
+- Don't bash competitors by name in positive tweets
 - Don't promise features that don't exist yet
 - Don't claim numbers you can't back up ("10x faster" is fine if you have benchmarks)

@@ -141,7 +141,7 @@ Source + docs: https://github.com/runly/runly
 
 ## r/QualityAssurance (80K members)
 
-**Title:** `Free open-source alternative to Testim/Mabl/KaneAI for devs who test their own code`
+**Title:** `Free open-source alternative to cloud test platforms for devs who test their own code`
 
 **Flair:** Automation
 
@@ -149,7 +149,7 @@ Source + docs: https://github.com/runly/runly
 ```
 Fair warning: this is a dev-first tool, not an enterprise QA platform.
 If you need visual test recorders, cloud dashboards, SSO, or SOC 2
-compliance, Runly isn't for you — stick with Testim/Mabl/KaneAI.
+compliance, Runly isn't for you — stick with the enterprise SaaS options.
 
 But if you're a QA engineer or developer at a small team who:
 - Can't afford $500/month per seat
@@ -252,8 +252,8 @@ PR-reviewable, and gives users full ownership.
     click sign in button
     verify dashboard
 
-Runly takes the ergonomics of enterprise tools (Testim, KaneAI,
-Momentic) but keeps the ownership model of tests-as-code.
+Runly takes the ergonomics of modern AI-powered test tools
+but keeps the ownership model of tests-as-code.
 
 Commands:
     runly run tests/            # run all tests in a directory

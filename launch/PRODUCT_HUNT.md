@@ -39,8 +39,8 @@ No dashboards, no subscriptions.
 ## First Comment (260 chars — the maker's pitch)
 
 ```
-Hi PH! I built Runly because enterprise test tools (Testim, KaneAI) cost
-$500+/month and lock your tests in their dashboards. Raw Playwright needs
+Hi PH! I built Runly because enterprise test tools cost $500+/month
+and lock your tests in their cloud dashboards. Raw Playwright needs
 20 lines of boilerplate per test. I wanted a third option — English
 instructions saved as .runly files you can commit to git.
 

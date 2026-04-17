@@ -1,8 +1,8 @@
 # Runly v0.3.0 — Build · Demo · Pitch · Outreach
 
-Goal: ship features that go beyond KaneAI/Momentic so Runly becomes a credible lead for a hiring offer at Browserbase / Anthropic (Claude Code) / Cursor / Cognition / Windsurf / Vercel / Replit / Bolt / E2B / Momentic / LambdaTest tier.
+Goal: ship features beyond today's AI-native test platforms so Runly becomes a credible lead for a hiring offer at Browserbase / Anthropic (Claude Code) / Cursor / Cognition / Windsurf / Vercel / Replit / Bolt / E2B / AI-native test SaaS tier.
 
-**Positioning:** *Plain-English browser tests for AI agents, via MCP.* Not "KaneAI but OSS" — picks-and-shovels for the Claude Code / Stagehand wave.
+**Positioning:** *Plain-English browser tests for AI agents, via MCP.* Not "cloud test SaaS but OSS" — picks-and-shovels for the Claude Code / Stagehand wave.
 
 ---
 
@@ -19,7 +19,7 @@ Goal: ship features that go beyond KaneAI/Momentic so Runly becomes a credible l
 
 ## Phase 2 — Demo content (late Week 1 / early Week 2)
 
-- [x] **#9 — Swag Labs head-to-head.** Committed as `c6dc239`. Full port of momentic-ai/examples/web: 245 lines of Momentic YAML → 70 lines of Runly plain text (3.5× smaller). Uses every new feature from #4-#6.
+- [x] **#9 — Swag Labs head-to-head.** Committed as `c6dc239`. Full port of a well-known cloud-editor YAML test suite: 245 lines of YAML → 70 lines of Runly plain text (3.5× smaller). Uses every new feature from #4-#6.
 - [ ] **#10 — Write 20+ tests for core modules.** Zero coverage = hiring red flag. Cover parser, interpolate, selectorEngine, sessionStore, visualDiff, MCP tool handlers. Use `node --test`. Green CI badge in README.
 - [ ] **#11 — Rewrite README with MCP hero demo + GIF.** Lead with *"Plain-English browser tests for AI agents, via MCP."* Terminalizer GIF showing Claude Code calling Runly. Move feature table below the fold.
 - [ ] **#12 — Record 90-sec Loom demos.** Three Looms:
@@ -31,7 +31,7 @@ Goal: ship features that go beyond KaneAI/Momentic so Runly becomes a credible l
 
 - [ ] **#13 — Build outreach target list (50 companies × 2 people each).**
   - **Tier 1 (market-aligned):** Browserbase, Stagehand, Anthropic (Claude Code team), Cursor, Cognition (Devin), Windsurf, Vercel, Replit, Bolt.new, E2B, Modal, Factory.
-  - **Tier 2 (browser-test incumbents):** Momentic, KaneAI / LambdaTest, Mabl, Testim.
+  - **Tier 2 (browser-test incumbents):** the well-known cloud test platforms (listed privately in outreach/targets.csv when drafted).
   - Each row: company, eng lead, X/LinkedIn URL, one specific hook line tied to their product.
   - Store as `outreach/targets.csv` in the repo.
 - [ ] **#14 — Draft outreach templates (DM + email × Tier 1 + Tier 2 = 4 variants).**
@@ -50,7 +50,7 @@ Goal: ship features that go beyond KaneAI/Momentic so Runly becomes a credible l
 
 ## What we are NOT building (and why)
 
-- **YAML test format** — Momentic's mistake (UUIDs, GUI-editor lock-in). `.runly` plain text is strictly better.
+- **YAML test format with UUIDs** — cloud-editor lock-in pattern. `.runly` plain text is strictly better.
 - **Multi-user / SSO / team features** — enterprise plumbing, hurts demo, not what OSS portfolios are judged on.
 - **Mobile device farm** — BrowserStack's category. Not winnable solo.
 - **Cloud dashboard / hosted tier** — would make Runly acquirable someday but distracts from the hiring goal.
@@ -62,6 +62,6 @@ Goal: ship features that go beyond KaneAI/Momentic so Runly becomes a credible l
 
 - `runly mcp` works inside Claude Code (verified by demo Loom)
 - `runly import my.spec.ts` produces a valid `.runly` file that actually runs green
-- Swag Labs head-to-head test demonstrably shorter than Momentic YAML
+- Swag Labs head-to-head test demonstrably shorter than YAML equivalents
 - 20+ tests passing in CI, green badge in README
 - 90-second Loom ready to embed in outreach DMs

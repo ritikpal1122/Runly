@@ -18,8 +18,8 @@ Every browser testing tool today falls into two camps:
 **Camp 1 — Raw Playwright/Cypress**
 You write 20 lines of boilerplate for every test. Selectors break on every deploy. Debugging is an ordeal.
 
-**Camp 2 — Enterprise SaaS (KaneAI, Momentic, Testim, Mabl)**
-$500/month minimum. Tests live in their dashboard, not your repo. You can't grep them, diff them, or review them in a PR.
+**Camp 2 — Enterprise SaaS**
+$500/month minimum. Tests live in their cloud dashboard, not your repo. You can't grep them, diff them, or review them in a PR.
 
 **Runly is camp 3 — Tests-as-code in plain English.**
 
@@ -271,7 +271,7 @@ When tests are in a SaaS dashboard:
 |---|---|
 | Playwright | The execution engine underneath |
 | Cypress | Developer experience matters |
-| KaneAI / Momentic | Natural language parsing is possible |
+| AI-native test SaaS | Natural language parsing is possible |
 | Vitest | Tests as code, fast feedback |
 | vercel/commander | Clean CLI patterns |
 
@@ -280,7 +280,7 @@ When tests are in a SaaS dashboard:
 ## FAQ
 
 **Is this production-ready?**
-Yes for small/medium projects. For enterprise use (SOC 2, on-prem, SSO), use KaneAI or Momentic.
+Yes for small/medium projects. For enterprise use (SOC 2, on-prem, SSO), you'll want one of the cloud test platforms.
 
 **Does it work with React/Vue/Angular?**
 Yes. Runly uses Playwright under the hood, which handles all modern frameworks.
