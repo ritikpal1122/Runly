@@ -18,6 +18,7 @@ import { sessionsCommand } from '../src/commands/sessions.js';
 import { runCommand } from '../src/commands/run.js';
 import { replCommand } from '../src/commands/repl.js';
 import { mcpCommand } from '../src/commands/mcp.js';
+import { importCommand } from '../src/commands/import.js';
 import logger from '../src/utils/logger.js';
 
 // No arguments → launch interactive REPL (don't run commander)
@@ -203,6 +204,14 @@ program
   .command('mcp')
   .description('Start the MCP server (for Claude Code, Cursor, Windsurf, etc.)')
   .action(mcpCommand);
+
+// ── Import Playwright specs ─────────────────────────────────────
+program
+  .command('import')
+  .description('Convert Playwright .spec.ts/.spec.js files to .runly format')
+  .argument('<path>', 'Spec file or directory of spec files')
+  .option('--out <dir>', 'Output directory (default: next to source)')
+  .action(importCommand);
 
   program.parse();
 }

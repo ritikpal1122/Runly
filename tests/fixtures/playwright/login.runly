@@ -1,0 +1,29 @@
+@name: standard user can log in
+@tags: authentication
+
+open https://www.saucedemo.com/
+type standard_user in Username
+type secret_sauce in Password
+click Login button
+verify url contains inventory
+verify Products is visible
+
+---
+
+@name: locked out user sees error
+@tags: authentication
+
+open https://www.saucedemo.com/
+type locked_out_user in user name
+type secret_sauce in password
+click login button
+verify error is visible
+verify Epic sadface is visible
+
+---
+
+@name: homepage loads
+
+open https://example.com
+verify title contains Example
+screenshot
