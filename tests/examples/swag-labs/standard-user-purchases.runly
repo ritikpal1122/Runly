@@ -1,0 +1,23 @@
+@name: Standard user completes checkout
+@tags: e2e, critical, checkout
+@description: End-to-end purchase flow — login, add two items, verify cart, checkout, verify totals
+@retry: 1
+
+@use login.runly with user=standard_user pass=secret_sauce
+@use add-item-to-cart.runly with item="sauce labs backpack"
+@use add-item-to-cart.runly with item="sauce labs onesie"
+
+click cart icon on the top right
+
+verify ai: both the sauce labs backpack and the sauce labs onesie are in the cart
+
+click checkout button
+
+@use fill-personal-info.runly
+
+click continue button
+
+verify ai: the item total matches the sum of each listed item's price
+verify ai: the total equals the item total plus tax
+
+click finish button

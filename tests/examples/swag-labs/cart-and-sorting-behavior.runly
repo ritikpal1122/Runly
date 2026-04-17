@@ -1,0 +1,25 @@
+@name: Cart state survives sort changes
+@tags: e2e, cart, sorting
+@description: Sorting changes the product view but must not mutate cart contents
+@retry: 1
+
+@use login.runly with user=standard_user pass=secret_sauce
+
+select price (low to high) from product sort
+@use add-item-to-cart.runly with item="cheapest item"
+
+select price (high to low) from product sort
+@use add-item-to-cart.runly with item="cheapest item"
+
+click cart icon on the top right
+
+verify ai: the first item in the cart is the cheapest item on the products page when sorted low to high
+
+click checkout button
+
+@use fill-personal-info.runly
+
+click continue button
+click finish button
+
+verify back home button is visible

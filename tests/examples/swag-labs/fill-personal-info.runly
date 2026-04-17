@@ -1,0 +1,7 @@
+# Fill out checkout personal info with synthetic data.
+
+@name: Fill personal info
+
+type {{faker.person.firstName}} in first name input
+type {{faker.person.lastName}} in last name input
+type {{faker.location.zipCode}} in zip code input
