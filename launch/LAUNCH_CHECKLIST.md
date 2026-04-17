@@ -24,7 +24,7 @@ Print this. Check items as you go. Don't skip steps.
       - Run `npm login` if not already logged in
       - Run `npm publish --dry-run` first to verify
       - Run `npm publish`
-      - Verify `npm install -g runly` works on a clean machine
+      - Verify `npm install -g runly-cli` works on a clean machine
 - [ ] Publish the GitHub Action to the marketplace
       - Create `runly/action` repo with just `action.yml`
       - Tag a release `v1`

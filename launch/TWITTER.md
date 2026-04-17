@@ -119,7 +119,7 @@ That's Runly's whole thesis.
 ```
 Try it in 30 seconds:
 
-$ npm install -g runly
+$ npm install -g runly-cli
 $ runly run tests/examples/
 
 GitHub: https://github.com/runly/runly

@@ -85,7 +85,7 @@ You need:
 ## Website / Links
 
 - **Main URL:** https://github.com/runly/runly
-- **Download:** `npm install -g runly`
+- **Download:** `npm install -g runly-cli`
 - **Source:** https://github.com/runly/runly
 
 ---

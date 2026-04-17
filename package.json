@@ -1,5 +1,5 @@
 {
-  "name": "runly",
+  "name": "runly-cli",
   "version": "0.3.0",
   "description": "Playwright tests in plain English. Lives in your repo. Runs anywhere.",
   "type": "module",

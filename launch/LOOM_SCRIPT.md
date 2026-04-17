@@ -38,7 +38,7 @@
 
 *(pause 1 sec)*
 
-> "That's Runly. MIT-licensed, lives in your repo, works offline, no dashboard. `npm install -g runly` — link's in the replies. If you're building AI-agent infrastructure or test tooling and any of this is interesting, my DMs are open. Thanks."
+> "That's Runly. MIT-licensed, lives in your repo, works offline, no dashboard. `npm install -g runly-cli` — link's in the replies. If you're building AI-agent infrastructure or test tooling and any of this is interesting, my DMs are open. Thanks."
 
 **[end recording]**
 

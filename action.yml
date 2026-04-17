@@ -65,7 +65,7 @@ runs:
     - name: Install Runly
       shell: bash
       run: |
-        npm install -g runly
+        npm install -g runly-cli
         npx playwright install --with-deps ${{ inputs.browser }}
 
     - name: Configure AI (optional)

@@ -74,7 +74,7 @@ Only 6 dependencies (playwright, commander, chalk, ora, fs-extra,
 @anthropic-ai/sdk).
 
 Try it:
-    npm install -g runly
+    npm install -g runly-cli
     runly test "open google.com and search playwright"
 
 Or write tests as files:

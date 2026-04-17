@@ -3,7 +3,7 @@
 **Plain-English browser tests for AI agents. MCP-native. Lives in your repo.**
 
 ```bash
-npm install -g runly
+npm install -g runly-cli
 runly test "open google.com and search playwright"
 ```
 
@@ -157,7 +157,7 @@ runly run tests/ --vars '{"site":"https://app.acme.dev","user":"admin","pass":"s
 ## Installation
 
 ```bash
-npm install -g runly
+npm install -g runly-cli
 npx playwright install chromium
 runly doctor                     # verify setup
 ```
