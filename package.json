@@ -48,6 +48,7 @@
   "homepage": "https://github.com/ritikpal1122/Runly#readme",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.87.0",
+    "@faker-js/faker": "^10.4.0",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "chalk": "^5.4.0",
     "commander": "^12.1.0",

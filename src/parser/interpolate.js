@@ -1,9 +1,16 @@
 // Variable substitution: {{varname}} → value
 // Loads vars from ~/.runly/vars/*.json and CLI --vars flag
+//
+// Also supports {{faker.*}} expressions that resolve to synthetic data:
+//   {{faker.person.firstName}}  → "Liam"
+//   {{faker.internet.email}}    → "dylan.hansen@example.com"
+//   {{faker.location.zipCode}}  → "12345"
+// Each occurrence produces a fresh value at interpolation time.
 
 import { readFileSync, existsSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
+import { faker } from '@faker-js/faker';
 
 const VARS_DIR = join(homedir(), '.runly', 'vars');
 
@@ -38,12 +45,22 @@ export function parseInlineVars(jsonStr) {
   }
 }
 
-// Substitute {{var}} with values
+// Substitute {{var}} with values. Also resolves {{faker.x.y}} expressions.
+//
+// Resolution order:
+//   1. faker.* paths             — {{faker.person.firstName}} → "Liam"
+//   2. explicit vars from caller — {{user}} if vars.user exists
+//   3. leave token unreplaced    — so downstream layers can still fill it
 export function interpolate(template, vars) {
   if (!template || typeof template !== 'string') return template;
-  return template.replace(/\{\{(\w+)\}\}/g, (match, name) => {
-    if (name in vars) {
-      const val = vars[name];
+  return template.replace(/\{\{([\w.]+)\}\}/g, (match, path) => {
+    if (path.startsWith('faker.')) {
+      const val = resolveFakerPath(path.slice('faker.'.length));
+      if (val != null) return String(val);
+      return match;
+    }
+    if (path in vars) {
+      const val = vars[path];
       if (typeof val === 'object' && val !== null && 'value' in val) {
         return val.value;
       }
@@ -51,6 +68,23 @@ export function interpolate(template, vars) {
     }
     return match;
   });
+}
+
+// Walk a dotted path on the faker namespace and, if it lands on a function,
+// call it. Returns undefined when the path is unknown or throws.
+function resolveFakerPath(path) {
+  try {
+    const parts = path.split('.');
+    let node = faker;
+    for (const p of parts) {
+      if (node == null) return undefined;
+      node = node[p];
+    }
+    if (typeof node === 'function') return node.call(faker);
+    return node;
+  } catch {
+    return undefined;
+  }
 }
 
 // Merge variables from all sources
