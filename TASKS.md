@@ -9,8 +9,8 @@ Goal: ship features that go beyond KaneAI/Momentic so Runly becomes a credible l
 ## Phase 1 — Build (Week 1)
 
 - [x] **#1 — Audit + commit current repo state.** REPL (342 LOC, was untracked) and auto-spec/dashboard finalization are now committed as `bc08bf5`.
-- [ ] **#2 — Build MCP server (`runly mcp`).** `@modelcontextprotocol/sdk`, stdio transport. Expose tools: `run_instruction`, `run_file`, `inspect_page`, `heal_selector`, `list_tests`, `get_last_run`, `open_url`. Test with Claude Code locally (add to `~/.claude.json` mcpServers).
-- [ ] **#3 — Build Playwright → .runly migrator (`runly import`).** Parse `.spec.ts`/`.spec.js`, use Claude to translate `page.goto/click/fill/expect` → plain-English `.runly` lines. Output file next to source. Handle `describe/test` → separate tests with `---` separators.
+- [x] **#2 — Build MCP server (`runly mcp`).** Committed as `331da57`. Six tools (`runly_test`, `runly_run_file`, `runly_list_tests`, `runly_inspect`, `runly_open_url`, `runly_last_run`) exposed over stdio. End-to-end smoke test passes — `runly_open_url` fetches example.com in 314ms.
+- [x] **#3 — Build Playwright → .runly migrator (`runly import`).** Committed as `1c7ebab`. Regex-based converter handles all common Playwright patterns. Round-trip verified on login.spec.ts — 3 tests / 15 steps / 0 TODOs, converted file runs green in 1020ms.
 - [ ] **#4 — Add modules/reusable-flows (`@use` directive).** Momentic-style reuse, but plain-text. Syntax: `@use login.runly with user={{admin}}`. Implemented in fileParser.js — inline the referenced file's steps with variable overrides.
 - [ ] **#5 — Add AI assertions (`verify ai: ...`).** Parser recognizes `verify ai: cart total equals sum of items`. Runner takes DOM snapshot + screenshot, asks Claude to decide pass/fail with reasoning. Momentic's killer feature, ported to plain English.
 - [ ] **#6 — Add Faker integration (`{{faker.email}}`, `{{faker.name}}`).** Add `@faker-js/faker` dep. Extend `interpolate.js` to resolve `{{faker.*}}` expressions at run time.
